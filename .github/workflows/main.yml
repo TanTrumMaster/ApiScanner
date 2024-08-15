@@ -1,0 +1,31 @@
+name: Update Config and Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'Repository URL to update in config.json'
+        required: true
+
+jobs:
+  update-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Update config.json with the new URL
+        run: |
+          # Define the path to config.json
+          CONFIG_FILE="config.json"
+
+          # Update the repoPath in config.json using jq
+          jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
+
+          echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
+
+      - name: Run JavaScript project
+        run: |
+          npm install
+          npm run start
