@@ -1,4 +1,4 @@
-name: Trigger Scan
+name: Trigger Postman Collection and ZAP Scan
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Update config.json with the new URL
         run: |
@@ -26,30 +26,23 @@ jobs:
           npm install
           npm run start
 
-      - name: Upload Postman Collection
-        uses: actions/upload-artifact@v4
-        with:
-          name: postman-collection
-          path: postman_collection.json
-
-      - name: Run OWASP ZAP Scan
-        uses: zaproxy/action-full-scan@v0.9.0  # Use the latest compatible version
-        with:
-          target: 'http://localhost:3000'
-          cmd_options: '-configfile /home/runner/work/owasp.conf -J /home/runner/work/report_json.json -w /home/runner/work/report_md.md -r /home/runner/work/report_html.html'
-
-      - name: List Working Directory
-        run: ls -R /home/runner/work/
-
-      - name: Print ZAP Logs
+      - name: Run Postman Collection with Newman
         run: |
-          echo "Printing logs in /zap/"
-          ls -R /zap/ || echo "No logs found in /zap/"
-          echo "Printing logs in /home/runner/work/"
-          ls -R /home/runner/work/*.log || echo "No logs found in /home/runner/work/"
+          npm install -g newman
+          newman run postman_collection.json --global-var "baseUrl=http://localhost:3000" --reporters cli
+
+      - name: Run ZAP Active Scan
+        run: |
+          # Assuming ZAP is running on localhost:8080
+          zap-cli start --start-options '-config api.disablekey=true'
+          zap-cli open-url http://localhost:3000
+          zap-cli spider http://localhost:3000
+          zap-cli active-scan http://localhost:3000
+          zap-cli report -o zap-report.html -f html
+          zap-cli stop
 
       - name: Upload ZAP Scan Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: /home/runner/work/report_html.html
+          path: zap-report.html
