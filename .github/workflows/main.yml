@@ -1,4 +1,4 @@
-name: Trigger Postman Collection and ZAP Scan
+name: Trigger Scan
 
 on:
   workflow_dispatch:
@@ -17,35 +17,35 @@ jobs:
 
       - name: Update config.json with the new URL
         run: |
+          # Define the path to config.json
           CONFIG_FILE="config.json"
+
+          # Update the repoPath in config.json using jq
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
+
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Start Application
+      - name: Run JavaScript project
         run: |
-          npm run start &  # Run in the background
-          sleep 10  # Wait for the application to start
+          npm install
+          npm run start
 
-      - name: Run Postman Collection with Newman
-        run: |
-          npm install -g newman
-          newman run postman_collection.json --global-var "baseUrl=http://localhost:3000" --reporters cli
-
-      - name: Run ZAP Active Scan
-        run: |
-          # Assuming ZAP is running on localhost:8080
-          zap-cli start --start-options '-config api.disablekey=true'
-          zap-cli open-url http://localhost:3000
-          zap-cli spider http://localhost:3000
-          zap-cli active-scan http://localhost:3000
-          zap-cli report -o zap-report.html -f html
-          zap-cli stop
-
-      - name: Upload ZAP Scan Report
+      - name: Upload Postman Collection
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
-          path: zap-report.html
+          name: postman-collection
+          path: postman_collection.json
+
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: ${{ github.event.inputs.repo_url }}
+          rules: "rules.json"
+          context: "context.json"
+          # Set other ZAP scan options as needed
+
+      - name: Upload ZAP Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results
+          path: zap_scan_results.xml
