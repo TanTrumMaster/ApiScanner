@@ -8,7 +8,7 @@ on:
         required: true
 
 permissions:
-  issues: write  # Add this line to grant permission to create and manage issues
+  issues: write  # Grants permission to create and manage issues
 
 jobs:
   update-and-run:
@@ -28,15 +28,31 @@ jobs:
 
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
-      - name: ZAP API Scan
-        uses: zaproxy/action-api-scan@v0.7.0
+      - name: Run JavaScript project
+        run: |
+          npm install
+          npm run start
+
+      - name: Upload Postman Collection
+        uses: actions/upload-artifact@v4
         with:
-          target: ${{ github.event.inputs.repo_url }}
-          rules: "rules.json"  # Specify path to your ZAP rules file if needed
-          context: "context.json"  # Specify path to your ZAP context file if needed
+          name: postman-collection
+          path: postman_collection.json
+
+      - name: Run ZAP API Scan with Postman Collection
+        run: |
+          # Pull the latest ZAP Docker image
+          docker pull owasp/zap2docker-stable
+          
+          # Run the ZAP scan with the Postman collection
+          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-api-scan.py \
+            -t ${{ github.event.inputs.repo_url }} \
+            -c /zap/wrk/postman_collection.json \
+            -r zap_report.html \
+            -d
 
       - name: Upload ZAP Scan Results
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results
-          path: zap_scan_results.xml
+          name: zap-report
+          path: zap_report.html
