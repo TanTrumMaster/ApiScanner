@@ -1,4 +1,4 @@
-name: Update Config and Run
+name: Trigger Scan
 
 on:
   workflow_dispatch:
