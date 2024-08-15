@@ -29,3 +29,9 @@ jobs:
         run: |
           npm install
           npm run start
+
+      - name: Upload Postman Collection
+        uses: actions/upload-artifact@v3
+        with:
+          name: postman-collection
+          path: postman_collection.json
