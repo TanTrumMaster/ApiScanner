@@ -1,6 +1,6 @@
 name: Trigger Scan
 
-on: #sdajhfriafasfrhafafukaheua
+on:
   workflow_dispatch:
     inputs:
       repo_url:
@@ -17,21 +17,32 @@ jobs:
 
       - name: Update config.json with the new URL
         run: |
-          # Define the path to config.json
           CONFIG_FILE="config.json"
-
-          # Update the repoPath in config.json using jq
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
-
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-
       - name: Run JavaScript project
         run: |
           npm install
           npm run start
-
       - name: Upload Postman Collection
         uses: actions/upload-artifact@v4
         with:
           name: postman-collection
           path: postman_collection.json
+
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: 'http://localhost:3000'  # Replace with your application's base URL
+          format: 'html'
+          output: '/home/runner/work/zap-report.html'  # Specify full path
+          cmd_options: '-configfile /zap/wrk/owasp.conf'
+
+      - name: List Files for Debugging
+        run: ls -R /home/runner/work
+
+      - name: Upload ZAP Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: /home/runner/work/zap-report.html
