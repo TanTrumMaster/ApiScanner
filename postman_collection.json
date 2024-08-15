@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "admin",
+    "description": "Collection generated programmatically from Node.js server",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "question",
+      "item": [
+        {
+          "name": "POST question",
+          "request": {
+            "url": "http::localhost:3000/create",
+            "method": "post",
+            "header": [],
+            "body": {},
+            "description": "POST question clonedRepo\\routes\\api\\v1\\question.js"
+          },
+          "response": []
+        },
+        {
+          "name": "GET question",
+          "request": {
+            "url": "http::localhost:3000/getQuestions",
+            "method": "get",
+            "header": [],
+            "body": {},
+            "description": "GET question clonedRepo\\routes\\api\\v1\\question.js"
+          },
+          "response": []
+        },
+        {
+          "name": "POST question",
+          "request": {
+            "url": "http::localhost:3000/:id/create/option",
+            "method": "post",
+            "header": [],
+            "body": {},
+            "description": "POST question clonedRepo\\routes\\api\\v1\\question.js"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE question",
+          "request": {
+            "url": "http::localhost:3000/:id",
+            "method": "delete",
+            "header": [],
+            "body": {},
+            "description": "DELETE question clonedRepo\\routes\\api\\v1\\question.js"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "index",
+      "item": [
+        {
+          "name": "GET index",
+          "request": {
+            "url": "http::localhost:3000/",
+            "method": "get",
+            "header": [],
+            "body": {},
+            "description": "GET index clonedRepo\\routes\\index.js"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "POST user",
+          "request": {
+            "url": "http::localhost:3000/create",
+            "method": "post",
+            "header": [],
+            "body": {},
+            "description": "POST user clonedRepo\\routes\\user.js"
+          },
+          "response": []
+        },
+        {
+          "name": "POST user",
+          "request": {
+            "url": "http::localhost:3000/create-session",
+            "method": "post",
+            "header": [],
+            "body": {},
+            "description": "POST user clonedRepo\\routes\\user.js"
+          },
+          "response": []
+        },
+        {
+          "name": "POST user",
+          "request": {
+            "url": "http::localhost:3000/result",
+            "method": "post",
+            "header": [],
+            "body": {},
+            "description": "POST user clonedRepo\\routes\\user.js"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
