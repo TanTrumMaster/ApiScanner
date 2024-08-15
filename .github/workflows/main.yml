@@ -39,17 +39,14 @@ jobs:
           name: postman-collection
           path: postman_collection.json
 
-      - name: Run ZAP API Scan with Postman Collection
-        run: |
-          # Pull the latest ZAP Docker image
-          docker pull owasp/zap2docker-weekly
-          
-          # Run the ZAP scan with the Postman collection
-          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-weekly zap-api-scan.py \
-            -t ${{ github.event.inputs.repo_url }} \
-            -c /zap/wrk/postman_collection.json \
-            -r zap_report.html \
-            -d
+      - name: ZAP API Scan with Postman Collection
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: ${{ github.event.inputs.repo_url }}
+          failAction: "true"
+          format: "html"
+          output: "zap_report.html"
+          postmanCollection: "postman_collection.json"
 
       - name: Upload ZAP Scan Results
         uses: actions/upload-artifact@v4
