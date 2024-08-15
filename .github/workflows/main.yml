@@ -32,20 +32,23 @@ jobs:
           name: postman-collection
           path: postman_collection.json
 
+      - name: Ensure ZAP Working Directory Exists
+        run: mkdir -p /zap/wrk/
+
       - name: Run OWASP ZAP Scan
         uses: zaproxy/action-full-scan@v0.8.0
         with:
           target: 'http://localhost:3000'
-          cmd_options: '-configfile /home/runner/work/owasp.conf -J /home/runner/work/report_json.json -w /home/runner/work/report_md.md -r /home/runner/work/report_html.html'
+          cmd_options: '-configfile /zap/wrk/owasp.conf -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html'
 
-      - name: List Files in Working Directory
-        run: ls -R /home/runner/work/
+      - name: List ZAP Working Directory
+        run: ls -R /zap/wrk/
 
       - name: Print ZAP Logs
-        run: ls -R /home/runner/work/*.log || echo "No logs found"
+        run: ls -R /zap/ || echo "No logs found in /zap"
 
       - name: Upload ZAP Scan Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: /home/runner/work/report_html.html
+          path: /zap/wrk/report_html.html
