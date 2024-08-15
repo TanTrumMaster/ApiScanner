@@ -21,10 +21,13 @@ jobs:
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
-      - name: Run JavaScript project
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Start Application
         run: |
-          npm install
-          npm run start
+          npm run start &  # Run in the background
+          sleep 10  # Wait for the application to start
 
       - name: Run Postman Collection with Newman
         run: |
