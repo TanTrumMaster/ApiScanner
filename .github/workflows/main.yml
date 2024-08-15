@@ -37,12 +37,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openapi-spec
-          path: openapi_spec.json  # Make sure this file exists
+          path: openapi_spec.json  # Ensure this file exists in the workspace
 
       - name: Download OpenAPI Spec
-        run: |
-          # Download the OpenAPI spec to the ZAP working directory
-          cp openapi_spec.json /home/runner/work/ApiScanner/ApiScanner/openapi_spec.json
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
 
       - name: ZAP API Scan with OpenAPI Spec
         uses: zaproxy/action-api-scan@v0.7.0
