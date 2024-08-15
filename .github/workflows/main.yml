@@ -37,17 +37,22 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openapi-spec
-          path: openapi_spec.json  # This is your converted OpenAPI spec
+          path: openapi_spec.json  # Make sure this file exists
+
+      - name: Download OpenAPI Spec
+        run: |
+          # Download the OpenAPI spec to the ZAP working directory
+          cp openapi_spec.json /home/runner/work/ApiScanner/ApiScanner/openapi_spec.json
 
       - name: ZAP API Scan with OpenAPI Spec
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          target: openapi_spec.json
+          target: "file:/zap/wrk/openapi_spec.json"
           format: "openapi"
-          report_html: "zap_report.html"
+          cmd_options: "-J report_json.json -w report_md.md -r report_html.html"
 
       - name: Upload ZAP Scan Results
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap_report.html
+          path: report_html.html
