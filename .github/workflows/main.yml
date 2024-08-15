@@ -42,10 +42,10 @@ jobs:
       - name: Run ZAP API Scan with Postman Collection
         run: |
           # Pull the latest ZAP Docker image
-          docker pull owasp/zap2docker-stable
+          docker pull owasp/zap2docker-weekly
           
           # Run the ZAP scan with the Postman collection
-          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-api-scan.py \
+          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-weekly zap-api-scan.py \
             -t ${{ github.event.inputs.repo_url }} \
             -c /zap/wrk/postman_collection.json \
             -r zap_report.html \
