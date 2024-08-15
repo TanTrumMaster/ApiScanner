@@ -28,17 +28,6 @@ jobs:
 
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
-      - name: Run JavaScript project
-        run: |
-          npm install
-          npm run start
-
-      - name: Upload Postman Collection
-        uses: actions/upload-artifact@v4
-        with:
-          name: postman-collection
-          path: postman_collection.json
-
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
