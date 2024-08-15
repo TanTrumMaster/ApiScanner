@@ -33,20 +33,18 @@ jobs:
           npm install
           npm run start
 
-      - name: Upload Postman Collection
+      - name: Upload OpenAPI Specification (converted from Postman Collection)
         uses: actions/upload-artifact@v4
         with:
-          name: postman-collection
-          path: postman_collection.json
+          name: openapi-spec
+          path: openapi_spec.json  # This is your converted OpenAPI spec
 
-      - name: ZAP API Scan with Postman Collection
+      - name: ZAP API Scan with OpenAPI Spec
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          target: ${{ github.event.inputs.repo_url }}
-          failAction: "true"
-          format: "html"
-          output: "zap_report.html"
-          postmanCollection: "postman_collection.json"
+          target: openapi_spec.json
+          format: "openapi"
+          report_html: "zap_report.html"
 
       - name: Upload ZAP Scan Results
         uses: actions/upload-artifact@v4
