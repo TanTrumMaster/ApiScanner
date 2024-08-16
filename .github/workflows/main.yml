@@ -43,51 +43,26 @@ jobs:
           password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU
 
       - name: Pull the latest ZAP Docker image
-        run: |
-          docker pull zaproxy/zap-stable
-      
+        run: docker pull zaproxy/zap-stable
+
       - name: Check if Postman Collection file exists
         run: ls -l postman_collection.json
-        
+
       - name: Convert Postman to OpenAPI
+        run: |
+          npm install postman-to-openapi
+          npx postman-to-openapi postman_collection.json openapi.yaml --default-tag 'General'
 
-        on:
-          push:
-            branches:
-              - main
-          workflow_dispatch:
-
-        jobs:
-          convert-postman-to-openapi:
-            runs-on: ubuntu-latest
-
-            steps:
-            - name: Checkout repository
-              uses: actions/checkout@v3
-
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                node-version: '16'
-
-            - name: Install dependencies
-              run: npm install postman-to-openapi
-
-            - name: Convert Postman to OpenAPI
-              run: |
-                npx postman-to-openapi postman_collection.json openapi.yaml --default-tag 'General'
-
-            - name: Upload OpenAPI file
-              uses: actions/upload-artifact@v3
-              with:
-                name: openapi-file
-                path: openapi.yaml
-
+      - name: Upload OpenAPI file
+        uses: actions/upload-artifact@v2
+        with:
+          name: openapi-file
+          path: openapi.yaml
 
       - name: Run ZAP API Scan
         run: |
-          # Run ZAP API scan against the Postman collection
-          docker run -t zaproxy/zap-stable zap-api-scan.py -t \
+          # Run ZAP API scan against the OpenAPI file
+          docker run -t zaproxy/zap-stable zap-api-scan.py \
             -t openapi.yaml \
             -f openapi \
             -r zap_report.html
