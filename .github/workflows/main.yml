@@ -44,7 +44,8 @@ jobs:
 
       - name: Pull the latest ZAP Docker image
         run: |
-          docker pull owasp/zap2docker-stable:latest
+          docker pull ghcr.io/zaproxy/zaproxy:bare
+          docker pull zaproxy/zap-bare
 
       - name: Run ZAP API Scan
         run: |
