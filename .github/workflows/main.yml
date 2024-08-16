@@ -47,8 +47,7 @@ jobs:
           docker pull zaproxy/zap-stable
       - name: Convert Postman Collection to OpenAPI
         run: |
-          npm install -g postman-to-openapi
-          postman-to-openapi /zap/wrk/postman_collection.json -o /zap/wrk/openapi.yaml
+          node p2o.js
 
       - name: Run ZAP API Scan
         run: |
