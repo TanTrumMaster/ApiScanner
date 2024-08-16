@@ -17,8 +17,12 @@ jobs:
 
       - name: Update config.json with the new URL
         run: |
+          # Define the path to config.json
           CONFIG_FILE="config.json"
+
+          # Update the repoPath in config.json using jq
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
+
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
       - name: Run JavaScript project
@@ -36,29 +40,16 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: tantrummaster
-          password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU
-
-      - name: Pull the latest ZAP Docker image
-        run: docker pull zaproxy/zap-stable
-
-      - name: Check if Postman Collection file exists
-        run: ls -l postman_collection.json
-
-      # - name: Convert Postman to OpenAPI
-      #   run: |
-      #     npm install postman-to-openapi
-      #     npx postman-to-openapi postman_collection.json openapi.yaml
-
-      # - name: Upload OpenAPI file
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: openapi-file
-      #     path: openapi.yaml
+          password: dckr_pat_49KTzaWixFwtWymsFse7poaOC5k
 
       - name: Run ZAP API Scan
         run: |
-          docker run -t zaproxy/zap-stable zap-api-scan.py \
-            -t postman_collection.json \
+          # Pull the latest ZAP Docker image
+          docker pull owasp/zap2docker-stable:2.13.0
+          
+          # Run ZAP API scan against the Postman collection
+          docker run --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable:2.13.0 zap-api-scan.py \
+            -t /zap/wrk/postman_collection.json \
             -f openapi \
             -r zap_report.html
 
