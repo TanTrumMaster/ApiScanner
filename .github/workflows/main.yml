@@ -45,6 +45,10 @@ jobs:
       - name: Pull the latest ZAP Docker image
         run: |
           docker pull zaproxy/zap-stable
+      
+      - name: Check if Postman Collection file exists
+        run: ls -l postman_collection.json
+        
       - name: Convert Postman Collection to OpenAPI
         run: |
           npm install postman-to-openapi@latest
