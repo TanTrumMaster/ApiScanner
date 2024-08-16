@@ -1,66 +1,30 @@
-name: Trigger Scan
+const axios = require('axios');
 
-on:
-  workflow_dispatch:
-    inputs:
-      repo_url:
-        description: 'Repository URL to update in config.json'
-        required: true
+const token = 'YOUR_PERSONAL_ACCESS_TOKEN'; // Replace with your GitHub token
+const owner = 'YOUR_GITHUB_USERNAME_OR_ORG';
+const repo = 'YOUR_REPOSITORY_NAME';
+const workflowId = 'YOUR_WORKFLOW_FILE_NAME.yml'; // or use the workflow ID
+const ref = 'main'; // Branch name or Git reference
 
-jobs:
-  update-and-run:
-    runs-on: ubuntu-latest
+const triggerWorkflow = async () => {
+  try {
+    const response = await axios.post(
+      `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
+      {
+        ref: ref
+      },
+      {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }
+    );
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    console.log('Workflow triggered:', response.data);
+  } catch (error) {
+    console.error('Error triggering workflow:', error.response ? error.response.data : error.message);
+  }
+};
 
-      - name: Update config.json with the new URL
-        run: |
-          CONFIG_FILE="config.json"
-          jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
-          echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-      - name: Run JavaScript project
-        run: |
-          npm install
-          npm run start
-      - name: Upload Postman Collection
-        uses: actions/upload-artifact@v2
-        with:
-          name: postman-collection
-          path: postman_collection.json
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: tantrummaster
-          password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU
-
-      - name: Pull the latest ZAP Docker image
-        run: docker pull zaproxy/zap-stable
-
-      - name: Check if Postman Collection file exists
-        run: ls -l postman_collection.json
-
-      - name: Convert Postman to OpenAPI
-        run: |
-          npm install postman-to-openapi@latest
-          npx postman-to-openapi ./postman_collection.json ./openapi.yaml
-
-      - name: Upload OpenAPI file
-        uses: actions/upload-artifact@v2
-        with:
-          name: openapi-file
-          path: openapi.yaml
-
-      - name: Run ZAP API Scan
-        run: |
-          docker run -t -v ${{ github.workspace }}:/zap/wrk zaproxy/zap-stable zap-api-scan.py \
-            -t /zap/wrk/openapi.yaml \
-            -f openapi \
-            -r /zap/wrk/zap_report.html
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: zap-report
-          path: zap_report.html
+triggerWorkflow();
