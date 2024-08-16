@@ -44,13 +44,13 @@ jobs:
 
       - name: Pull the latest ZAP Docker image
         run: |
-          docker pull ghcr.io/zaproxy/zaproxy:bare
-          docker pull zaproxy/zap-bare
+          docker pull ghcr.io/zaproxy/zaproxy:stable
+          docker pull zaproxy/zap-stable
 
       - name: Run ZAP API Scan
         run: |
           # Run ZAP API scan against the Postman collection
-          docker run --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable:latest zap-api-scan.py \
+          docker run --rm -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
             -t /zap/wrk/postman_collection.json \
             -f openapi \
             -r zap_report.html
