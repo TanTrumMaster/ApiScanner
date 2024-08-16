@@ -7,9 +7,6 @@ on:
         description: 'Repository URL to update in config.json'
         required: true
 
-permissions:
-  issues: write  # Grants permission to create and manage issues
-
 jobs:
   update-and-run:
     runs-on: ubuntu-latest
@@ -33,26 +30,25 @@ jobs:
           npm install
           npm run start
 
-      - name: Upload OpenAPI Specification (converted from Postman Collection)
-        uses: actions/upload-artifact@v4
+      - name: Upload Postman Collection
+        uses: actions/upload-artifact@v2
         with:
-          name: openapi-spec
-          path: openapi_spec.json  # Ensure this file exists in the workspace
+          name: postman-collection
+          path: postman_collection.json
 
-      - name: Download OpenAPI Spec
-        uses: actions/download-artifact@v4
-        with:
-          name: openapi-spec
+      - name: Run ZAP API Scan
+        run: |
+          # Pull the latest ZAP Docker image
+          docker pull owasp/zap2docker-stable
+          
+          # Run ZAP API scan against the Postman collection
+          docker run --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-api-scan.py \
+            -t /zap/wrk/postman_collection.json \
+            -f openapi \
+            -r zap_report.html
 
-      - name: ZAP API Scan with OpenAPI Spec
-        uses: zaproxy/action-api-scan@v0.7.0
-        with:
-          target: "file:/zap/wrk/openapi_spec.json"
-          format: "openapi"
-          cmd_options: "-J report_json.json -w report_md.md -r report_html.html"
-
-      - name: Upload ZAP Scan Results
-        uses: actions/upload-artifact@v4
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v2
         with:
           name: zap-report
-          path: report_html.html
+          path: zap_report.html
