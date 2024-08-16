@@ -45,12 +45,16 @@ jobs:
       - name: Pull the latest ZAP Docker image
         run: |
           docker pull zaproxy/zap-stable
+      - name: Convert Postman Collection to OpenAPI
+        run: |
+          npm install -g postman-to-openapi
+          postman-to-openapi /zap/wrk/postman_collection.json -o /zap/wrk/openapi.yaml
 
       - name: Run ZAP API Scan
         run: |
           # Run ZAP API scan against the Postman collection
           docker run -t zaproxy/zap-stable zap-api-scan.py -t \
-            -t /zap/wrk/postman_collection.json \
+            -t /zap/wrk/openapi.yaml \
             -f openapi \
             -r zap_report.html
 
