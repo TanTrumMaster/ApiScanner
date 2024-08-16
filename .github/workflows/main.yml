@@ -49,7 +49,7 @@ jobs:
       - name: Run ZAP API Scan
         run: |
           # Run ZAP API scan against the Postman collection
-          docker run -t zaproxy/zap-stable docker/zap-api-scan.py -t \
+          docker run -t zaproxy/zap-stable zaproxy/docker/zap-api-scan.py -t \
             -t /zap/wrk/postman_collection.json \
             -f openapi \
             -r zap_report.html
