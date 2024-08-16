@@ -20,12 +20,10 @@ jobs:
           CONFIG_FILE="config.json"
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-
       - name: Run JavaScript project
         run: |
           npm install
           npm run start
-
       - name: Upload Postman Collection
         uses: actions/upload-artifact@v2
         with:
@@ -61,7 +59,6 @@ jobs:
       - name: conversion
         run: |
           node p2o ./postman_collection.json -f ./openapi.yaml -o ./options.json
-
           
       - name: Upload OpenAPI file
         uses: actions/upload-artifact@v2
@@ -75,7 +72,6 @@ jobs:
             -t /zap/wrk/openapi.yaml \
             -f openapi \
             -r /zap/wrk/zap_report.html
-
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v2
         with:
