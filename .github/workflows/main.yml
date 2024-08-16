@@ -49,16 +49,46 @@ jobs:
       - name: Check if Postman Collection file exists
         run: ls -l postman_collection.json
         
-      - name: Convert Postman Collection to OpenAPI
-        run: |
-          npm install postman-to-openapi@latest
-          node p2o.js
+      - name: Convert Postman to OpenAPI
+
+        on:
+          push:
+            branches:
+              - main
+          workflow_dispatch:
+
+        jobs:
+          convert-postman-to-openapi:
+            runs-on: ubuntu-latest
+
+            steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: '16'
+
+            - name: Install dependencies
+              run: npm install postman-to-openapi
+
+            - name: Convert Postman to OpenAPI
+              run: |
+                npx postman-to-openapi postman_collection.json openapi.yaml --default-tag 'General'
+
+            - name: Upload OpenAPI file
+              uses: actions/upload-artifact@v3
+              with:
+                name: openapi-file
+                path: openapi.yaml
+
 
       - name: Run ZAP API Scan
         run: |
           # Run ZAP API scan against the Postman collection
           docker run -t zaproxy/zap-stable zap-api-scan.py -t \
-            -t /zap/wrk/openapi.yaml \
+            -t openapi.yaml \
             -f openapi \
             -r zap_report.html
 
