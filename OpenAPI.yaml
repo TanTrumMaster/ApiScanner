@@ -1,180 +1,39 @@
-openapi: 3.0.0
-info:
-  title: admin
-  description: Collection generated programmatically from Node.js server
-  version: 1.0.0
-servers:
-  - url: http://localhost:3000
-tags:
-  - name: question
-  - name: index
-  - name: user
-paths:
-  /create:
-    post:
-      tags:
-        - user
-      summary: POST user
-      description: POST user clonedRepo\routes\user.js
-      requestBody:
+name: Trigger Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'Repository URL to update in config.json'
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-  /getQuestions:
-    get:
-      tags:
-        - question
-      summary: GET question
-      description: GET question clonedRepo\routes\api\v1\question.js
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    question:
-                      type: string
-  /{id}/create/option:
-    post:
-      tags:
-        - question
-      summary: POST question
-      description: POST question clonedRepo\routes\api\v1\question.js
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                option:
-                  type: string
-      parameters:
-        - name: id
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    type: string
-  /{id}:
-    delete:
-      tags:
-        - question
-      summary: DELETE question
-      description: DELETE question clonedRepo\routes\api\v1\question.js
-      parameters:
-        - name: id
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /:
-    get:
-      tags:
-        - index
-      summary: GET index
-      description: GET index clonedRepo\routes\index.js
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-  /create-session:
-    post:
-      tags:
-        - user
-      summary: POST user session
-      description: POST user session clonedRepo\routes\user.js
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  sessionId:
-                    type: string
-  /result:
-    post:
-      tags:
-        - user
-      summary: POST result
-      description: POST result clonedRepo\routes\user.js
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                result:
-                  type: string
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+
+permissions:
+  issues: write  # Add this line to grant permission to create and manage issues
+
+jobs:
+  update-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - name: Update config.json with the new URL
+      #   run: |
+      #     # Define the path to config.json
+      #     CONFIG_FILE="config.json"
+      #     # Update the repoPath in config.json using jq
+      #     jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
+      #     echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: ${{ github.event.inputs.repo_url }}
+          rules: "rules.json"  # Specify path to your ZAP rules file if needed
+          context: "context.json"  # Specify path to your ZAP context file if needed
+
+      - name: Upload ZAP Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results
+          path: zap_scan_results.xml
