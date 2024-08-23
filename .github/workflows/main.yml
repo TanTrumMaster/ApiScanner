@@ -3,12 +3,12 @@ name: Trigger Scan
 on:
   workflow_dispatch:
     inputs:
-      repo_url:
-        description: 'Repository URL to update in config.json'
+      openapi_file:
+        description: 'Path to the OpenAPI.yaml file to scan'
         required: true
 
 permissions:
-  issues: write  # Add this line to grant permission to create and manage issues
+  issues: write  # Grant permission to create and manage issues
 
 jobs:
   update-and-run:
@@ -18,18 +18,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # - name: Update config.json with the new URL
-      #   run: |
-      #     # Define the path to config.json
-      #     CONFIG_FILE="config.json"
-      #     # Update the repoPath in config.json using jq
-      #     jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
-      #     echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          # target: ${{ github.event.inputs.repo_url }}
-          target: "OpenAPI.yaml"
+          target: "${{ github.event.inputs.openapi_file }}"
           rules: "rules.json"  # Specify path to your ZAP rules file if needed
           context: "context.json"  # Specify path to your ZAP context file if needed
 
