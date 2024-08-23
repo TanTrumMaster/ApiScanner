@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: admin
+  description: Collection generated programmatically from Node.js server
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: question
+  - name: index
+  - name: user
+paths:
+  /create:
+    post:
+      tags:
+        - user
+      summary: POST user
+      description: POST user clonedRepo\routes\user.js
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /getQuestions:
+    get:
+      tags:
+        - question
+      summary: GET question
+      description: GET question clonedRepo\routes\api\v1\question.js
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{id}/create/option:
+    post:
+      tags:
+        - question
+      summary: POST question
+      description: POST question clonedRepo\routes\api\v1\question.js
+      requestBody:
+        content: {}
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{id}:
+    delete:
+      tags:
+        - question
+      summary: DELETE question
+      description: DELETE question clonedRepo\routes\api\v1\question.js
+      requestBody:
+        content: {}
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /:
+    get:
+      tags:
+        - index
+      summary: GET index
+      description: GET index clonedRepo\routes\index.js
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /create-session:
+    post:
+      tags:
+        - user
+      summary: POST user
+      description: POST user clonedRepo\routes\user.js
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /result:
+    post:
+      tags:
+        - user
+      summary: POST user
+      description: POST user clonedRepo\routes\user.js
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
