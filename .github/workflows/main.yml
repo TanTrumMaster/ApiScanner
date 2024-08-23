@@ -23,12 +23,14 @@ jobs:
     - name: Pull OWASP ZAP Docker image
       run: |
         docker pull zaproxy/zap-stable
-    - name: Run OWASP ZAP API Scan
+    - name: Run ZAP Full Scan
       run: |
-        docker run -v ${{ github.workspace }}:/zap/wrk zaproxy/zap-stable zap-api-scan.py -t "https://dummy-backend-check.onrender.com/api/users" -f openapi -r zap_report.html
-        docker cp $(docker ps -q -l):/zap/zap_report.html ./zap_report.html
+        mkdir -p ${{ github.workspace }}/report
+        chmod 777 ${{ github.workspace }}/report
+        docker run -v ${{ github.workspace }}/report:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://dummy-backend-check.onrender.com/api/users -r /zap/wrk/testreport.html
+        
     - name: Upload ZAP Report
       uses: actions/upload-artifact@v3
       with:
         name: ZAP Report
-        path: ./zap_report.html
+        path: ${{ github.workspace }}/report/testreport.html
