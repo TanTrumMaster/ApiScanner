@@ -7,6 +7,9 @@ on:
         description: 'Repository URL to update in config.json'
         required: true
 
+permissions:
+  issues: write  # Add this line to grant permission to create and manage issues
+
 jobs:
   update-and-run:
     runs-on: ubuntu-latest
@@ -17,63 +20,20 @@ jobs:
 
       - name: Update config.json with the new URL
         run: |
+          # Define the path to config.json
           CONFIG_FILE="config.json"
+          # Update the repoPath in config.json using jq
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-      - name: Run JavaScript project
-        run: |
-          npm install
-          npm run start
-      - name: Upload Postman Collection
-        uses: actions/upload-artifact@v2
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
         with:
-          name: postman-collection
-          path: postman_collection.json
-          
-      - name: Download Postman Collection Artifact
-        uses: actions/download-artifact@v2
+          target: ${{ github.event.inputs.repo_url }}
+          rules: "rules.json"  # Specify path to your ZAP rules file if needed
+          context: "context.json"  # Specify path to your ZAP context file if needed
+
+      - name: Upload ZAP Scan Results
+        uses: actions/upload-artifact@v4
         with:
-            name: postman-collection
-            path: ./
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: tantrummaster
-          password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU
-
-      - name: Pull the latest ZAP Docker image
-        run: docker pull zaproxy/zap-stable
-
-      - name: Check if Postman Collection file exists
-        run: ls -l postman_collection.json
-
-      - name: Convert Postman to OpenAPI
-        run: |
-          npm install postman-to-openapi
-      # - name: p2o
-      #   run: |
-      #     pip install p2o
-          
-        # npx postman-to-openapi postman_collection.json openapi.yaml
-      - name: conversion
-        run: |
-          node p2o ./postman_collection.json -f ./openapi.yaml -o ./options.json
-          
-      - name: Upload OpenAPI file
-        uses: actions/upload-artifact@v2
-        with:
-          name: openapi-file
-          path: openapi.yaml
-
-      - name: Run ZAP API Scan
-        run: |
-          docker run -t -v ${{ github.workspace }}:/zap/wrk zaproxy/zap-stable zap-api-scan.py \
-            -t /zap/wrk/openapi.yaml \
-            -f openapi \
-            -r /zap/wrk/zap_report.html
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: zap-report
-          path: zap_report.html
+          name: zap-scan-results
+          path: zap_scan_results.xml
