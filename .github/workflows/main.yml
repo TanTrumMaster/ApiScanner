@@ -72,7 +72,7 @@ jobs:
       - name: Run ZAP API Scan
         run: |
           docker run -t -v ${{ github.workspace }}:/zap/wrk zaproxy/zap-stable zap-api-scan.py \
-            -t OpenAPI.yml \
+            -t openapi.yaml \
             -f openapi \
             -r zap_report.html
 #/zap/wrk/
