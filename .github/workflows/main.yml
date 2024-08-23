@@ -18,6 +18,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Start the server
+        run: |
+          # Command to start your server (adjust this to your needs)
+          npm install
+          npm start &
+          # Wait for the server to start
+          sleep 10
+
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
