@@ -27,7 +27,7 @@ jobs:
       run: |
         mkdir -p ${{ github.workspace }}/report
         chmod 777 ${{ github.workspace }}/report
-        docker run -v ${{ github.workspace }}/report:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://dummy-backend-check.onrender.com/api/users -r /zap/wrk/testreport.html
+        docker run -v ${{ github.workspace }}/report:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://dummy-backend-check.onrender.com/api/users -r report.html
         
     - name: Upload ZAP Report
       uses: actions/upload-artifact@v3
