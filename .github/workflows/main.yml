@@ -28,7 +28,7 @@ jobs:
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          target: ${{ github.event.inputs.repo_url }}
+          target: ${{ openapi.yaml }}
           rules: "rules.json"  # Specify path to your ZAP rules file if needed
           context: "context.json"  # Specify path to your ZAP context file if needed
 
