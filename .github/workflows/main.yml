@@ -21,22 +21,22 @@ jobs:
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
 
-      # - name: Run JavaScript project
-      #   run: |
-      #     npm install
-      #     npm run start
+      - name: Run JavaScript project
+        run: |
+          npm install
+          npm run start
 
-      # - name: Upload Postman Collection
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: postman-collection
-      #     path: postman_collection.json
+      - name: Upload Postman Collection
+        uses: actions/upload-artifact@v2
+        with:
+          name: postman-collection
+          path: postman_collection.json
           
-      # - name: Download Postman Collection Artifact
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #       name: postman-collection
-      #       path: ./
+      - name: Download Postman Collection Artifact
+        uses: actions/download-artifact@v2
+        with:
+            name: postman-collection
+            path: ./
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -47,27 +47,27 @@ jobs:
       - name: Pull the latest ZAP Docker image
         run: docker pull zaproxy/zap-stable
 
-      # - name: Check if Postman Collection file exists
-      #   run: ls -l postman_collection.json
+      - name: Check if Postman Collection file exists
+        run: ls -l postman_collection.json
 
-      # - name: Convert Postman to OpenAPI
-      #   run: |
-      #     npm install postman-to-openapi
-      # - name: p2o
-      #   run: |
-      #     pip install p2o
+      - name: Convert Postman to OpenAPI
+        run: |
+          npm install postman-to-openapi
+      - name: p2o
+        run: |
+          pip install p2o
           
         # npx postman-to-openapi postman_collection.json openapi.yaml
-      # - name: conversion
-      #   run: |
-      #     node p2o ./postman_collection.json -f ./openapi.yaml -o ./options.json
+      - name: conversion
+        run: |
+          node p2o ./postman_collection.json -f ./openapi.yaml -o ./options.json
 
           
-      # - name: Upload OpenAPI file
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: openapi-file
-      #     path: openapi.yaml
+      - name: Upload OpenAPI file
+        uses: actions/upload-artifact@v2
+        with:
+          name: openapi-file
+          path: openapi.yaml
 
       - name: Run ZAP API Scan
         run: |
