@@ -25,6 +25,15 @@ on:
 jobs:
   zap_scan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        api: 
+          - ${{ github.event.inputs.api1 }}
+          - ${{ github.event.inputs.api2 }}
+          - ${{ github.event.inputs.api3 }}
+          - ${{ github.event.inputs.api4 }}
+          - ${{ github.event.inputs.api5 }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -37,21 +46,18 @@ jobs:
 
     - name: Pull OWASP ZAP Docker image
       run: |
-        docker pull zaproxy/zap2docker-stable
-
-    - name: Run ZAP Full Scans
+        docker pull zaproxy/zap-stable
+        
+    - name: Run ZAP Full Scan on ${{ matrix.api }}
       run: |
-        for api in "${{ github.event.inputs.api1 }}" "${{ github.event.inputs.api2 }}" "${{ github.event.inputs.api3 }}" "${{ github.event.inputs.api4 }}" "${{ github.event.inputs.api5 }}"; do
-          SAFE_API=$(echo "$api" | sed 's/[\/:]/_/g')
-          mkdir -p ${{ github.workspace }}/report-${SAFE_API}
-          chmod 777 ${{ github.workspace }}/report-${SAFE_API}
-          docker run -v ${{ github.workspace }}/report-${SAFE_API}:/zap/wrk:rw -t zaproxy/zap2docker-stable zap-full-scan.py -t $api -r /zap/wrk/testreport-${SAFE_API}.html -daemon -m 10 || true
-          echo "Checking if report exists for $api..."
-          ls -l ${{ github.workspace }}/report-${SAFE_API}
-        done
-
-    - name: Upload ZAP Reports
+        mkdir -p ${{ github.workspace }}/report-${{ matrix.api }}
+        chmod 777 ${{ github.workspace }}/report-${{ matrix.api }}
+        docker run -v ${{ github.workspace }}/report-${{ matrix.api }}:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t ${{ matrix.api }} -r /zap/wrk/testreport-${{ matrix.api }}.html || true
+        echo "Checking if report exists..."
+        ls -l ${{ github.workspace }}/report-${{ matrix.api }}
+        
+    - name: Upload ZAP Report for ${{ matrix.api }}
       uses: actions/upload-artifact@v3
       with:
-        name: ZAP Reports
-        path: ${{ github.workspace }}/report-*/testreport-*.html
+        name: ZAP Report ${{ matrix.api }}
+        path: ${{ github.workspace }}/report-${{ matrix.api }}/testreport-${{ matrix.api }}.html
