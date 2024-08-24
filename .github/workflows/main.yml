@@ -1,11 +1,10 @@
 name: OWASP ZAP API Scan
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      repo_url:
-        description: 'Repository URL to update in config.json'
-        required: true
 
 jobs:
   zap_scan:
@@ -15,49 +14,23 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Update config.json with the new URL
-      run: |
-          CONFIG_FILE="config.json"
-          jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
-          echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-
-    - name: Run JavaScript project
-      run: |
-        npm install
-        npm run start
-
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: tantrummaster
-        password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU  # Use a GitHub secret
+        password: dckr_pat_RDR6QwvY94nJ-J2SKyjiPTKnpoU
 
     - name: Pull OWASP ZAP Docker image
       run: |
-        docker pull ghcr.io/zaproxy/zaproxy:stable
-
-    - name: Check if Postman Collection file exists
-      run: ls -l postman_collection.json
-
-    - name: Convert Postman to OpenAPI
-      run: |
-          npm install postman-to-openapi
-          npx postman-to-openapi ./postman_collection.json -f ./openapi.json -o ./options.json
-
-    - name: Upload OpenAPI file
-      uses: actions/upload-artifact@v3
-      with:
-          name: openapi-file
-          path: openapi.json
-
+        docker pull zaproxy/zap-stable
     - name: Run ZAP Full Scan
       run: |
         mkdir -p ${{ github.workspace }}/report
         chmod 777 ${{ github.workspace }}/report
-        docker run -v ${{ github.workspace }}/report:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py -t /zap/wrk/openapi.json -f openapi -r /zap/wrk/testreport.html || true
+        docker run -v ${{ github.workspace }}/report:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t https://dummy-backend-check.onrender.com/api/users -r /zap/wrk/testreport.html || true
         echo "Checking if report exists..."
         ls -l ${{ github.workspace }}/report
-  
+        
     - name: Upload ZAP Report
       uses: actions/upload-artifact@v3
       with:
