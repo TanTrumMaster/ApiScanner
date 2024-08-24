@@ -52,7 +52,7 @@ jobs:
       run: |
         mkdir -p ${{ github.workspace }}/report-${{ matrix.api }}
         chmod 777 ${{ github.workspace }}/report-${{ matrix.api }}
-        docker run -v ${{ github.workspace }}/report-${{ matrix.api }}:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t ${{ matrix.api }} -r /zap/wrk/testreport-${{ matrix.api }}.html || true
+        docker run -v ${{ github.workspace }}/report-${{ matrix.api }} -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t ${{ matrix.api }} -r /zap/wrk/testreport-${{ matrix.api }}.html || true
         echo "Checking if report exists..."
         ls -l ${{ github.workspace }}/report-${{ matrix.api }}
         
