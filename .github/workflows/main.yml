@@ -7,19 +7,19 @@ on:
   workflow_dispatch:
     inputs:
       api1:
-        description: 'https://github.com/Siddhant02082002/backend-testing2.0'
+        description: 'API Endpoint 1'
         required: true
       api2:
-        description: 'https://github.com/Siddhant02082002/backend-testing2.0'
+        description: 'API Endpoint 2'
         required: true
       api3:
-        description: 'https://github.com/Siddhant02082002/backend-testing2.0'
+        description: 'API Endpoint 3'
         required: true
       api4:
-        description: 'https://github.com/Siddhant02082002/backend-testing2.0'
+        description: 'API Endpoint 4'
         required: true
       api5:
-        description: 'https://github.com/Siddhant02082002/backend-testing2.0'
+        description: 'API Endpoint 5'
         required: true
 
 jobs:
