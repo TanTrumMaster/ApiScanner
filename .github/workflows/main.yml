@@ -47,17 +47,23 @@ jobs:
     - name: Pull OWASP ZAP Docker image
       run: |
         docker pull zaproxy/zap-stable
-        
+
+    - name: Sanitize API URL for file paths
+      id: sanitize
+      run: |
+        SAFE_API=$(echo "${{ matrix.api }}" | sed 's/[\/:]/_/g')
+        echo "SAFE_API=${SAFE_API}" >> $GITHUB_ENV
+
     - name: Run ZAP Full Scan on ${{ matrix.api }}
       run: |
-        mkdir -p ${{ github.workspace }}/report-${{ matrix.api }}
-        chmod 777 ${{ github.workspace }}/report-${{ matrix.api }}
-        docker run -v ${{ github.workspace }}/report-${{ matrix.api }}:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t ${{ matrix.api }} -r /zap/wrk/testreport-${{ matrix.api }}.html || true
+        mkdir -p ${{ github.workspace }}/report-${{ env.SAFE_API }}
+        chmod 777 ${{ github.workspace }}/report-${{ env.SAFE_API }}
+        docker run -v ${{ github.workspace }}/report-${{ env.SAFE_API }}:/zap/wrk:rw -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t ${{ matrix.api }} -r /zap/wrk/testreport-${{ env.SAFE_API }}.html || true
         echo "Checking if report exists..."
-        ls -l ${{ github.workspace }}/report-${{ matrix.api }}
+        ls -l ${{ github.workspace }}/report-${{ env.SAFE_API }}
         
     - name: Upload ZAP Report for ${{ matrix.api }}
       uses: actions/upload-artifact@v3
       with:
         name: ZAP Report ${{ matrix.api }}
-        path: ${{ github.workspace }}/report-${{ matrix.api }}/testreport-${{ matrix.api }}.html
+        path: ${{ github.workspace }}/report-${{ env.SAFE_API }}/testreport-${{ env.SAFE_API }}.html
